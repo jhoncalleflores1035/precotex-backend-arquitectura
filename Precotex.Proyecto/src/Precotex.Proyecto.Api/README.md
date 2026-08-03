@@ -10,8 +10,6 @@ flowchart TD
     ROOT --> CTRL[📁 Controllers]
     CTRL --> INV[📁 Inventario]
     CTRL --> VEN[📁 Ventas]
-    CTRL --> COM[📁 Compras]
-    CTRL --> PRO[📁 Produccion]
     ROOT --> EXT[📁 Extensions]
     EXT --> EXTF[⚙️ ServiceExtensions.cs]
     ROOT --> MID[📁 Middlewares]
@@ -28,8 +26,6 @@ flowchart TD
     style CTRL fill:#2d6a4f,stroke:#1b4332,color:#fff
     style INV fill:#40916c,stroke:#1b4332,color:#fff
     style VEN fill:#40916c,stroke:#1b4332,color:#fff
-    style COM fill:#40916c,stroke:#1b4332,color:#fff
-    style PRO fill:#40916c,stroke:#1b4332,color:#fff
     style EXT fill:#74c69d,stroke:#1b4332,color:#000
     style EXTF fill:#95d5b2,stroke:#1b4332,color:#000
     style MID fill:#ffb703,stroke:#1b4332,color:#000
