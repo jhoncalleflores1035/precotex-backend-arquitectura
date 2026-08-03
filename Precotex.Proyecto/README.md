@@ -1,4 +1,4 @@
-# Precotex.Proyecto
+# Precotex Proyecto
 
 ## Objetivo
 
@@ -10,8 +10,8 @@ El proyecto sigue el enfoque de **Clean Architecture**, organizado en las siguie
 
 ```
 src/
-├── Precotex.API             # Punto de entrada. Controllers, middlewares, configuración, inyección de dependencias.
-├── Precotex.Application      # Casos de uso, DTOs, interfaces, validaciones, lógica de orquestación.
+├── Precotex.API               # Punto de entrada. Controllers, middlewares, configuración, inyección de dependencias.
+├── Precotex.Application       # Casos de uso, DTOs, interfaces, validaciones, lógica de orquestación.
 ├── Precotex.Domain            # Entidades, agregados, value objects, enums y reglas de negocio puras.
 └── Precotex.Infrastructure    # Implementación de acceso a datos (Dapper), servicios externos, persistencia.
 ```
@@ -41,7 +41,7 @@ flowchart LR
 | xUnit / Moq (o equivalente) | Pruebas unitarias |
 | Git / GitHub | Control de versiones |
 
-## Flujo de trabajo con Git (Branching)
+## Flujo de trabajo con Git
 
 El repositorio utiliza un flujo basado en dos ramas principales y un proceso de QA como puerta de calidad antes de llegar a producción:
 
