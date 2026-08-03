@@ -4,37 +4,55 @@ Punto de entrada de la solución. Depende de `Precotex.Proyecto.Application` →
 
 ## Estructura
 
-```
-Precotex.Proyecto.Api/
-├── Controllers/
-│   ├── Inventario/
-│   ├── Ventas/
-│   ├── Compras/
-│   └── Produccion/
-├── Extensions/
-│   └── ServiceExtensions.cs
-├── Middlewares/
-│   ├── ExceptionHandlingMiddleware.cs
-│   └── CorrelationIdMiddleware.cs
-├── Filters/
-│   └── ValidationFilter.cs
-├── Configuration/
-│   ├── JwtOptions.cs
-│   └── SwaggerOptions.cs
-├── appsettings.json
-└── Program.cs
+```mermaid
+flowchart TD
+    ROOT[🗂️ Precotex.Proyecto.Api]
+    ROOT --> CTRL[📁 Controllers]
+    CTRL --> INV[📁 Inventario]
+    CTRL --> VEN[📁 Ventas]
+    CTRL --> COM[📁 Compras]
+    CTRL --> PRO[📁 Produccion]
+    ROOT --> EXT[📁 Extensions]
+    EXT --> EXTF[⚙️ ServiceExtensions.cs]
+    ROOT --> MID[📁 Middlewares]
+    MID --> MIDF1[🛡️ ExceptionHandlingMiddleware.cs]
+    MID --> MIDF2[🔗 CorrelationIdMiddleware.cs]
+    ROOT --> FIL[📁 Filters]
+    FIL --> FILF[✅ ValidationFilter.cs]
+    ROOT --> CFG[📁 Configuration]
+    CFG --> CFGF1[🔐 JwtOptions.cs]
+    CFG --> CFGF2[📝 SwaggerOptions.cs]
+    ROOT --> PRG[🚀 Program.cs]
+
+    style ROOT fill:#1b4332,stroke:#1b4332,color:#fff
+    style CTRL fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style INV fill:#40916c,stroke:#1b4332,color:#fff
+    style VEN fill:#40916c,stroke:#1b4332,color:#fff
+    style COM fill:#40916c,stroke:#1b4332,color:#fff
+    style PRO fill:#40916c,stroke:#1b4332,color:#fff
+    style EXT fill:#74c69d,stroke:#1b4332,color:#000
+    style EXTF fill:#95d5b2,stroke:#1b4332,color:#000
+    style MID fill:#ffb703,stroke:#1b4332,color:#000
+    style MIDF1 fill:#ffd166,stroke:#1b4332,color:#000
+    style MIDF2 fill:#ffd166,stroke:#1b4332,color:#000
+    style FIL fill:#219ebc,stroke:#1b4332,color:#fff
+    style FILF fill:#8ecae6,stroke:#1b4332,color:#000
+    style CFG fill:#e76f51,stroke:#1b4332,color:#fff
+    style CFGF1 fill:#f4a261,stroke:#1b4332,color:#000
+    style CFGF2 fill:#f4a261,stroke:#1b4332,color:#000
+    style PRG fill:#9d0208,stroke:#1b4332,color:#fff
 ```
 
-## Carpeta → contenido → principio SOLID
+## Carpeta → contenido → SOLID
 
-| Carpeta | Contiene | Regla | SOLID |
-|---|---|---|---|
-| `Controllers/{Modulo}/` | Un controller por recurso, agrupado por módulo de negocio | Solo recibe request → llama servicio de `Application` → devuelve respuesta. Nunca lógica de negocio ni entidades de `Domain` expuestas | SRP / DIP |
-| `Extensions/ServiceExtensions.cs` | Todos los `AddXxx()` del proyecto: `AddApplicationServices`, `AddInfrastructureServices`, `AddSwaggerConfig`, `AddAuthConfig`, `AddCorsConfig` | Un método estático por bloque de configuración, todos en el mismo archivo (proyecto modular, sin submódulos) | SRP |
-| `Middlewares/` | Manejo global de excepciones, correlación de requests | Un middleware = una responsabilidad | SRP |
-| `Filters/` | Validación de `ModelState`, filtros de auditoría | Cross-cutting a nivel de acción, no de todo el pipeline | SRP |
-| `Configuration/` | POCOs para `IOptions<T>` (`JwtOptions`, `SwaggerOptions`, ...) | Un archivo por sección de `appsettings.json`, binding centralizado | SRP |
-| `Program.cs` | Composition root | Solo invoca los métodos de `Extensions/`, cero configuración inline | — |
+| Carpeta | Contiene | SOLID |
+|---|---|---|
+| `Controllers/{Modulo}/` | Controllers por módulo de negocio | SRP / DIP |
+| `Extensions/ServiceExtensions.cs` | Todos los `AddXxx()` del proyecto | SRP |
+| `Middlewares/` | Excepciones, correlación de requests | SRP |
+| `Filters/` | Validación, auditoría por acción | SRP |
+| `Configuration/` | POCOs para `IOptions<T>` | SRP |
+| `Program.cs` | Composition root | — |
 
 `Program.cs` queda así de simple:
 

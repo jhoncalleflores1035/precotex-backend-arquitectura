@@ -20,8 +20,9 @@ flowchart LR
 |---|---|---|
 | `Entities/` | Objetos con identidad (`Id`) y reglas propias | `Cliente`, `Pedido`, `Producto` |
 | `Enums/` | Catálogos cerrados de valores del negocio | `EstadoPedido`, `TipoCliente` |
+| `Interfaces/` | Contratos que pertenecen al negocio, no a infraestructura | `IReglaDescuento`, `IValidable` |
 
-Nada más por ahora: **no** se usan Value Objects, Agregados, Excepciones de dominio ni Domain Events en este proyecto. Si en el futuro se necesitan, se documentan aquí antes de introducirlos.
+Por ahora **no** se usan Value Objects, Agregados, Excepciones de dominio ni Domain Events en este proyecto. Si en el futuro se necesitan, se documentan aquí antes de introducirlos.
 
 ## Flujo: ciclo de vida de una entidad
 
@@ -38,51 +39,15 @@ stateDiagram-v2
 
 Confirmado y Cancelado no tienen salida entre sí: la propia entidad impide, por diseño, pasar de `Confirmado` a `Cancelado` directamente. Esa restricción vive en el método de la entidad, no en quien la llama.
 
-## Principios SOLID básicos, como flujos
+## Principios SOLID básicos
 
-### S — Single Responsibility
-
-La entidad solo conoce sus reglas de negocio; guardar/consultar datos es responsabilidad de otra capa.
-
-```mermaid
-flowchart LR
-    Pedido["Pedido (Domain)\nreglas de negocio"] -->|expone estado ya validado| Infra["Infrastructure\nguarda en BD"]
-```
-
-### O — Open/Closed
-
-Una variante nueva del negocio se agrega como un camino adicional, sin tocar los caminos ya existentes.
-
-```mermaid
-flowchart TD
-    Tipo{Tipo de cliente} -->|VIP| DVip["Descuento 10%"]
-    Tipo -->|Regular| DReg["Descuento 0%"]
-    Tipo -.->|nuevo tipo futuro| DNuevo["se agrega aparte,\nsin modificar los anteriores"]
-```
-
-### L — Liskov Substitution
-
-Un tipo derivado debe poder reemplazar al tipo base en el mismo flujo, sin romperlo.
-
-```mermaid
-flowchart LR
-    Caller[Quien usa la entidad] --> Cliente[Cliente]
-    ClienteVip[ClienteVip] -.sustituye sin romper el flujo.-> Cliente
-```
-
-### I — Interface Segregation
-
-Si el dominio define algún contrato, cada uno cubre un solo propósito en vez de uno solo con todo mezclado.
-
-```mermaid
-flowchart LR
-    IValidable --> Entidad
-    ICalculable --> Entidad
-```
-
-### D — Dependency Inversion
-
-Ya representado en el primer diagrama: Domain no depende de nadie, y todas las demás capas dependen de él. Domain es el punto de partida de la inversión de dependencias.
+| Principio | Concepto básico | En esta capa |
+|---|---|---|
+| **S** — Single Responsibility | Una clase debe tener una única razón para cambiar | La entidad solo conoce sus reglas de negocio, no cómo se guarda ni cómo se muestra |
+| **O** — Open/Closed | Abierta a extensión, cerrada a modificación | Una regla nueva se agrega como caso adicional, sin reescribir la lógica existente |
+| **L** — Liskov Substitution | Un subtipo debe poder usarse donde se espera el tipo base, sin romper el comportamiento | `ClienteVip` debe comportarse como un `Cliente` válido, no lanzar errores inesperados |
+| **I** — Interface Segregation | Interfaces pequeñas y específicas, no una sola con de todo | `IValidable` valida, `ICalculable` calcula; no una interfaz que mezcle ambas responsabilidades |
+| **D** — Dependency Inversion | Depender de abstracciones, no de implementaciones concretas | Domain no depende de nada; Application e Infrastructure dependen de él (ver diagrama al inicio) |
 
 ## Checklist antes de un PR sobre Domain
 
