@@ -1,6 +1,6 @@
-# Precotex.Proyecto.Application
+# Precotex Proyecto Application
 
-Depende de `Precotex.Proyecto.Domain`. No conoce a `Precotex.Proyecto.Api` ni a `Precotex.Proyecto.Infrastructure`: define **qué** se necesita (interfaces), nunca **cómo** se resuelve.
+Depende de `Precotex.Proyecto.Domain`. No conoce a `Precotex.Proyecto.Api` ni a `Precotex.Proyecto.Infrastructure`: define **qué** se necesita para orquestar casos de uso (interfaces de servicios), nunca **cómo** se resuelve. Los contratos de persistencia (`IRepository`) no viven aquí: los define `Domain`, porque describen operaciones sobre sus propias entidades.
 
 Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).
 
@@ -38,9 +38,9 @@ flowchart LR
     A["🌐 API Controller"] -->|"Request DTO"| B["⚙️ UseCase"]
     B --> C{"✅ Validator"}
     C -->|inválido| X["⚠️ Exception"]
-    C -->|válido| D["🔌 IRepository"]
+    C -->|válido| D["🔌 IRepository (Domain)"]
     D -.implementado por.-> E["🏗️ Infrastructure"]
-    D --> F["🟩 Domain (Entidad)"]
+    E -->|"Entidad"| F["🟩 Domain (Entidad)"]
     F --> B
     B -->|"Response DTO"| A
 
@@ -53,12 +53,12 @@ flowchart LR
     style F fill:#2d6a4f,stroke:#1b4332,color:#fff
 ```
 
-Application **define** `IRepository`; `Infrastructure` lo **implementa**. Si el caso de uso necesitara conocer la clase concreta (`DapperPedidoRepository`), la dependencia estaría invertida y rompería la regla de la arquitectura.
+`Domain` **define** `IRepository`; `Infrastructure` lo **implementa**; `Application` (el `UseCase`) solo lo **consume** por inyección de dependencias, sin conocer la implementación concreta. Si el caso de uso necesitara conocer la clase concreta (`DapperPedidoRepository`), la dependencia estaría invertida y rompería la regla de la arquitectura.
 
 ## Carpeta → contenido → SOLID
 
 | Carpeta | Contiene | SOLID |
 |---|---|---|
-| `Interfaces/{Modulo}/` | Contratos que implementa Infrastructure (repositorios, servicios externos), organizados por módulo de negocio | DIP / ISP |
+| `Interfaces/{Modulo}/` | Contratos propios de orquestación (servicios externos, notificaciones) que implementa Infrastructure, organizados por módulo de negocio — los repositorios (`IRepository`) viven en `Domain` | DIP / ISP |
 | `DTOs/` | Objetos planos de entrada/salida, sin lógica | SRP |
 | `Validators/` | Reglas de validación de entrada | SRP |

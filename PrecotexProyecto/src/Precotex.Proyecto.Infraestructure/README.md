@@ -1,6 +1,6 @@
 # Precotex.Proyecto.Infraestructure
 
-Depende de `Precotex.Proyecto.Application` (y, a través de ella, de `Precotex.Proyecto.Domain`). Implementa lo que Application define como interfaz: **cómo** se resuelve el acceso a datos y los servicios externos, nunca **qué** se necesita.
+Depende de `Precotex.Proyecto.Domain` (implementa sus contratos de persistencia, `IRepository`) y de `Precotex.Proyecto.Application` (implementa sus contratos de orquestación). Implementa lo que Domain y Application definen como interfaz: **cómo** se resuelve el acceso a datos y los servicios externos, nunca **qué** se necesita.
 
 ## Estructura
 
@@ -29,7 +29,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A["🔌 IRepository (Application)"] -.implementa.-> B["🏗️ DapperRepository"]
+    A["🔌 IRepository (Domain)"] -.implementa.-> B["🏗️ DapperRepository"]
     B --> C["🔌 DapperContext"]
     C --> D[("🛢️ Base de datos")]
     B -->|"mapea filas a"| E["🟩 Entidad (Domain)"]
@@ -47,7 +47,7 @@ flowchart LR
 
 | Carpeta | Contiene | SOLID |
 |---|---|---|
-| `Repositories/{Modulo}/` | Implementación concreta (Dapper) de las interfaces definidas en Application, organizadas por módulo de negocio | DIP / LSP |
+| `Repositories/{Modulo}/` | Implementación concreta (Dapper) de las interfaces definidas en Domain, organizadas por módulo de negocio | DIP / LSP |
 | `Persistence/` | Conexión y contexto de acceso a datos (`DapperContext`) | SRP |
 | `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) | SRP / ISP |
 

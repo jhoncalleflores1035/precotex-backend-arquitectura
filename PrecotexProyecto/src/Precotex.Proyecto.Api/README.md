@@ -1,4 +1,4 @@
-# Precotex.Proyecto.Api
+# Precotex Proyecto Api
 
 Punto de entrada de la solución. Depende de `Precotex.Proyecto.Application` → `Precotex.Proyecto.Domain`. Sin lógica de negocio: solo expone, valida y traduce.
 

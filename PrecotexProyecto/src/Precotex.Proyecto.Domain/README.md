@@ -5,7 +5,7 @@ Capa más interna de la arquitectura. **No depende de ninguna otra capa** (ni de
 ```mermaid
 flowchart LR
     APP[Application] --> DOM[Domain]
-    INFRA[Infrastructure] -.no depende directo.-> DOM
+    INFRA[Infrastructure] -->|"implementa interfaces"| DOM
 
     style DOM fill:#2d6a4f,stroke:#1b4332,color:#fff
 ```
@@ -23,6 +23,9 @@ flowchart TD
     ENUM --> ENUMF[📄 EstadoPedido, TipoCliente]
     ROOT --> INT[📁 Interfaces]
     INT --> INTF[📄 IReglaDescuento, IValidable]
+    INT --> INTREPO[📁 Repositories]
+    INTREPO --> INTREPOINV[📁 Inventario]
+    INTREPO --> INTREPOVEN[📁 Ventas]
 
     style ROOT fill:#1b4332,stroke:#1b4332,color:#fff
     style ENT fill:#2d6a4f,stroke:#1b4332,color:#fff
@@ -31,11 +34,16 @@ flowchart TD
     style ENUMF fill:#ffd166,stroke:#1b4332,color:#000
     style INT fill:#e76f51,stroke:#1b4332,color:#fff
     style INTF fill:#f4a261,stroke:#1b4332,color:#000
+    style INTREPO fill:#f4a261,stroke:#1b4332,color:#000
+    style INTREPOINV fill:#ffd8a8,stroke:#1b4332,color:#000
+    style INTREPOVEN fill:#ffd8a8,stroke:#1b4332,color:#000
 ```
 
 ## Flujo: ejecución de un caso de uso
 
 Domain es el último eslabón de la cadena API → Application → Domain. No conoce el `UseCase` que lo invoca, ni el Request/Response DTO, ni Dapper/EF: solo expone métodos de negocio y protege sus propias invariantes.
+
+Los contratos de persistencia (`Interfaces/Repositories/{Modulo}`, ej. `IPedidoRepository`) también viven en Domain: describen operaciones sobre sus propias entidades, por lo que el dominio es quien debe definirlas. Domain nunca los invoca ni los referencia en tiempo de ejecución — solo `Application` los consume (inyectados) e `Infrastructure` los implementa.
 
 ```mermaid
 flowchart LR
@@ -61,7 +69,8 @@ El `UseCase` le entrega a la entidad los datos ya validados en forma primitiva; 
 |---|---|---|
 | `Entities/` | Objetos con identidad (`Id`) y reglas propias de negocio | SRP / OCP / LSP |
 | `Enums/` | Catálogos cerrados de valores del negocio | — |
-| `Interfaces/` | Contratos que pertenecen al negocio, no a infraestructura | ISP / DIP |
+| `Interfaces/` | Contratos de reglas de negocio puras (`IReglaDescuento`, `IValidable`) | ISP / DIP |
+| `Interfaces/Repositories/{Modulo}/` | Contratos de persistencia (`IPedidoRepository`, `IProductoRepository`, etc.) que `Infrastructure` implementa, organizados por módulo de negocio | DIP / ISP |
 
 Por ahora **no** se usan Value Objects, Agregados, Excepciones de dominio ni Domain Events en este proyecto. Si en el futuro se necesitan, se documentan aquí antes de introducirlos.
 

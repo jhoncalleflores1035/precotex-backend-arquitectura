@@ -10,7 +10,9 @@ src/
 └── Precotex.Infrastructure    # Implementación de acceso a datos (Dapper), servicios externos, persistencia.
 ```
 
-**Regla de dependencia:** las capas internas (Domain) no dependen de ninguna otra capa. Application depende de Domain. Infrastructure y API dependen de Application y, a través de esta, de Domain. Ninguna capa interna conoce detalles de las capas externas.
+**Regla de dependencia:** las capas internas (Domain) no dependen de ninguna otra capa. Application depende de Domain. API depende de Application y, a través de esta, de Domain. Infrastructure depende directamente de Domain (implementa sus contratos de persistencia, `IRepository`) y de Application (implementa sus contratos de orquestación). Ninguna capa interna conoce detalles de las capas externas.
+
+Los contratos de repositorio (`IRepository`) se definen en Domain, porque describen operaciones sobre sus propias entidades; los contratos de orquestación (servicios externos, notificaciones) se definen en Application. Infrastructure implementa ambos.
 
 ```mermaid
 flowchart LR
