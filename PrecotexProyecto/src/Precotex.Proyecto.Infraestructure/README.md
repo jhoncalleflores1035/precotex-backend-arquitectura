@@ -1,4 +1,4 @@
-# Precotex.Proyecto.Infraestructure
+# Precotex Proyecto Infraestructure
 
 Depende de `Precotex.Proyecto.Domain` (implementa sus contratos de persistencia, `IRepository`) y de `Precotex.Proyecto.Application` (implementa sus contratos de orquestación). Implementa lo que Domain y Application definen como interfaz: **cómo** se resuelve el acceso a datos y los servicios externos, nunca **qué** se necesita.
 

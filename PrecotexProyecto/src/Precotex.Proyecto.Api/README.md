@@ -14,7 +14,6 @@ flowchart TD
     EXT --> EXTF[⚙️ ServiceExtensions.cs]
     ROOT --> MID[📁 Middlewares]
     MID --> MIDF1[🛡️ ExceptionHandlingMiddleware.cs]
-    MID --> MIDF2[🔗 CorrelationIdMiddleware.cs]
     ROOT --> FIL[📁 Filters]
     FIL --> FILF[✅ ValidationFilter.cs]
     ROOT --> CFG[📁 Configuration]
@@ -30,7 +29,6 @@ flowchart TD
     style EXTF fill:#95d5b2,stroke:#1b4332,color:#000
     style MID fill:#ffb703,stroke:#1b4332,color:#000
     style MIDF1 fill:#ffd166,stroke:#1b4332,color:#000
-    style MIDF2 fill:#ffd166,stroke:#1b4332,color:#000
     style FIL fill:#219ebc,stroke:#1b4332,color:#fff
     style FILF fill:#8ecae6,stroke:#1b4332,color:#000
     style CFG fill:#e76f51,stroke:#1b4332,color:#fff
@@ -41,12 +39,11 @@ flowchart TD
 
 ## Flujo: ejecución de un caso de uso
 
-El controller es la puerta de entrada HTTP: no valida reglas de negocio ni conoce infraestructura, solo recibe el request, deja que los filters y middlewares hagan su parte, y delega en el `UseCase` de `Application`.
+El controller es la puerta de entrada HTTP: no valida reglas de negocio ni conoce infraestructura, solo recibe el request, deja que los filters hagan su parte, y delega en el `UseCase` de `Application`.
 
 ```mermaid
 flowchart LR
-    A["🌐 HTTP Request"] --> B["🔗 CorrelationIdMiddleware"]
-    B --> C["✅ ValidationFilter"]
+    A["🌐 HTTP Request"] --> C["✅ ValidationFilter"]
     C -->|inválido| X["⚠️ 400 Bad Request"]
     C -->|válido| D["🎮 Controller"]
     D -->|"Request DTO"| E["⚙️ UseCase (Application)"]
@@ -57,7 +54,6 @@ flowchart LR
     G --> H["📤 HTTP Response"]
 
     style A fill:#74c69d,stroke:#1b4332,color:#000
-    style B fill:#ffd166,stroke:#1b4332,color:#000
     style C fill:#8ecae6,stroke:#1b4332,color:#000
     style X fill:#9d0208,stroke:#1b4332,color:#fff
     style D fill:#2d6a4f,stroke:#1b4332,color:#fff
@@ -75,7 +71,7 @@ El controller nunca contiene lógica de negocio: arma el Request DTO, invoca el 
 |---|---|---|
 | `Controllers/{Modulo}/` | Controllers por módulo de negocio | SRP / DIP |
 | `Extensions/ServiceExtensions.cs` | Todos los `AddXxx()` del proyecto | SRP |
-| `Middlewares/` | Excepciones, correlación de requests | SRP |
+| `Middlewares/` | Excepciones | SRP |
 | `Filters/` | Validación, auditoría por acción | SRP |
 | `Configuration/` | POCOs para `IOptions<T>` | SRP |
 | `Program.cs` | Composition root | — |
