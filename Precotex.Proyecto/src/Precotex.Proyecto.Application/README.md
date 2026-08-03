@@ -62,13 +62,3 @@ Application **define** `IRepository`; `Infrastructure` lo **implementa**. Si el 
 | `Interfaces/{Modulo}/` | Contratos que implementa Infrastructure (repositorios, servicios externos), organizados por módulo de negocio | DIP / ISP |
 | `DTOs/` | Objetos planos de entrada/salida, sin lógica | SRP |
 | `Validators/` | Reglas de validación de entrada | SRP |
-
-## Principios SOLID básicos
-
-| Principio | Concepto básico | En esta capa |
-|---|---|---|
-| **S** — Single Responsibility | Una clase debe tener una única razón para cambiar | Cada `UseCase` resuelve una sola acción de negocio; no mezcla creación, validación externa ni reportes en la misma clase |
-| **O** — Open/Closed | Abierta a extensión, cerrada a modificación | Un caso de uso nuevo se agrega como clase nueva; no se llena de `if` un caso de uso existente para soportar variantes |
-| **L** — Liskov Substitution | Un subtipo debe poder usarse donde se espera el tipo base, sin romper el comportamiento | Cualquier implementación de `IExportadorReporte` (PDF, Excel) debe funcionar igual para quien la consume, sin sorpresas |
-| **I** — Interface Segregation | Interfaces pequeñas y específicas, no una sola con de todo | `IPedidoLector` y `IPedidoEscritor` en vez de un `IPedidoRepository` gigante si los consumidores no usan todo |
-| **D** — Dependency Inversion | Depender de abstracciones, no de implementaciones concretas | El `UseCase` depende de `IRepository` (definida aquí), nunca de la clase concreta que vive en Infrastructure |
