@@ -41,33 +41,31 @@ flowchart TD
 
 ## Flujo: ejecución de un caso de uso
 
-El controller es la puerta de entrada HTTP: no valida reglas de negocio ni conoce infraestructura, solo recibe el request, deja que los filters hagan su parte, y delega en el `UseCase` de `Application`.
+El request atraviesa la pipeline en orden: entra por los middlewares, pasa los filters, llega al controller y de ahí baja capa por capa hasta infraestructura.
+
+El controller nunca contiene lógica de negocio ni conoce detalles de infraestructura.
 
 ```mermaid
-flowchart LR
-    A["🌐 HTTP Request"] --> C["✅ ValidationFilter"]
-    C -->|inválido| X["⚠️ 400 Bad Request"]
-    C -->|válido| D["🎮 Controller"]
-    D -->|"Request DTO"| E["⚙️ UseCase (Application)"]
-    E --> F["🟩 Domain / Infrastructure"]
-    F --> E
-    E -->|"Response DTO"| D
-    D --> G["🛡️ ExceptionHandlingMiddleware"]
-    G --> H["📤 HTTP Response"]
+flowchart TD
+    A["🌐 Request"] --> B["🛡️ Middleware"]
+    B --> C["✅ Filters"]
+    C --> D["🎮 Controller"]
+    D --> E["⚙️ Application"]
+    E --> F["🟩 Domain"]
+    F --> G["📐 Repository (Interface)"]
+    G --> H["🏗️ Infrastructure"]
 
     style A fill:#74c69d,stroke:#1b4332,color:#000
+    style B fill:#ffd166,stroke:#1b4332,color:#000
     style C fill:#8ecae6,stroke:#1b4332,color:#000
-    style X fill:#9d0208,stroke:#1b4332,color:#fff
     style D fill:#2d6a4f,stroke:#1b4332,color:#fff
     style E fill:#40916c,stroke:#1b4332,color:#fff
-    style F fill:#e76f51,stroke:#1b4332,color:#fff
-    style G fill:#ffd166,stroke:#1b4332,color:#000
-    style H fill:#74c69d,stroke:#1b4332,color:#000
+    style F fill:#1b4332,stroke:#1b4332,color:#fff
+    style G fill:#f4a261,stroke:#1b4332,color:#000
+    style H fill:#e76f51,stroke:#1b4332,color:#fff
 ```
 
-El controller nunca contiene lógica de negocio: arma el Request DTO, invoca el `UseCase` correspondiente y traduce el Response DTO a un `IActionResult`. Cualquier excepción de negocio o de infraestructura la captura `ExceptionHandlingMiddleware`, que la traduce a un código HTTP apropiado.
-
-## Qué pertenece aquí
+## Responsabilidades de la capa
 
 | Carpeta | Contiene | SOLID |
 |---|---|---|
@@ -78,7 +76,10 @@ El controller nunca contiene lógica de negocio: arma el Request DTO, invoca el 
 | `Configuration/` | POCOs para `IOptions<T>` | SRP |
 | `Program.cs` | Composition root | — |
 
-`Program.cs` queda así de simple:
+
+## Composition Root
+
+La configuración principal de la aplicación se concentra en `Program.cs`, delegando el registro de servicios a métodos de extensión.
 
 ```csharp
 builder.Services.AddApplicationServices();
@@ -95,14 +96,26 @@ app.MapControllers();
 
 ## Qué NO pertenece aquí
 
-| 🚫 → capa |
-|---|
-| Reglas de negocio → `Domain` |
-| Orquesta varios repos/servicios → `Application` |
-| Acceso a datos (SQL, Dapper) → `Infrastructure` |
-| Valida invariantes de negocio → `Domain` |
-| Define `IRepository` → `Domain` |
-| Mapea entidad directo en la respuesta |
+| No colocar | Corresponde a |
+|---|---|
+| Reglas de negocio | `Domain` |
+| Orquestación de casos de uso | `Application` |
+| Acceso a datos | `Infrastructure` |
+| Interfaces de repositorio | `Domain` |
+| Validaciones de dominio | `Domain` |
+| Mapeo directo de entidades | `Application` |
+
+---
+
+
+## Dependencias
+
+La capa API puede depender de:
+
+- Application
+- Domain (opcional para contratos compartidos)
+
+No debe depender de implementaciones de Infrastructure.
 
 ---
 
