@@ -1,9 +1,7 @@
 # Precotex Proyecto Api
 
 Punto de entrada de la aplicación.
-
 Su responsabilidad es recibir las solicitudes, validar la información de entrada, delegar los casos de uso y devolver la respuesta al cliente.
-
 No contiene lógica de negocio.
 
 ## Estructura
@@ -69,7 +67,7 @@ flowchart LR
 
 El controller nunca contiene lógica de negocio: arma el Request DTO, invoca el `UseCase` correspondiente y traduce el Response DTO a un `IActionResult`. Cualquier excepción de negocio o de infraestructura la captura `ExceptionHandlingMiddleware`, que la traduce a un código HTTP apropiado.
 
-## Carpeta → contenido → SOLID
+## Qué pertenece aquí
 
 | Carpeta | Contiene | SOLID |
 |---|---|---|
@@ -93,28 +91,18 @@ app.UseExceptionHandlingMiddleware();
 app.MapControllers();
 ```
 
-## Qué pertenece aquí
-
-- Mapea HTTP a Request DTO
-- Delega en `UseCase`
-- Traduce Response DTO a `IActionResult`
-- Valida forma del request (`ValidationFilter`)
-- Maneja excepciones (`ExceptionHandlingMiddleware`)
-- Compone DI (`Program.cs`, `ServiceExtensions`)
-- Documenta con Swagger
-
 ---
 
 ## Qué NO pertenece aquí
 
-- Reglas de negocio → `Domain`
-- Orquesta varios repos/servicios → `Application`
-- Acceso a datos (SQL, Dapper) → `Infrastructure`
-- Valida invariantes de negocio → `Domain`
-- Define `IRepository` → `Domain`
-- Mapea entidad directo en la respuesta
-- `if` de negocio en Controller/Middleware
-- Detalle de queries, nombres de tabla
+| 🚫 → capa |
+|---|
+| Reglas de negocio → `Domain` |
+| Orquesta varios repos/servicios → `Application` |
+| Acceso a datos (SQL, Dapper) → `Infrastructure` |
+| Valida invariantes de negocio → `Domain` |
+| Define `IRepository` → `Domain` |
+| Mapea entidad directo en la respuesta |
 
 ---
 
