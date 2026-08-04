@@ -65,13 +65,13 @@ flowchart LR
 
 ## Alcance
 
-| Corresponde a esta capa | No corresponde (¿dónde va?) |
+| ✅ Sí | 🚫 No → capa |
 |---|---|
-| Orquestar un caso de uso (`UseCase`): coordinar entidades, repositorios y servicios externos | Reglas de negocio / invariantes de una entidad → `Domain` |
-| Definir DTOs de entrada/salida (`Request`/`Response`) | Detalles de implementación de infraestructura (Dapper, SQL, HttpClient concreto) → `Infrastructure` |
-| Validar la forma del request (`FluentValidation`: requeridos, formatos, rangos) | Tipos de ASP.NET Core (`HttpContext`, `IActionResult`, atributos de Controller) → `Api` |
-| Definir interfaces de orquestación (servicios externos, notificaciones) que implementa `Infrastructure` | Contratos de persistencia (`IRepository`) → `Domain`, porque describen operaciones sobre sus propias entidades |
-| Mapear entre DTO y Entidad de `Domain` | Decidir si un cambio de estado es válido para el negocio (eso lo decide la propia entidad) |
-| Conocer la interfaz `IRepository` (nunca su implementación concreta) | Código HTTP, formato de respuesta, códigos de estado |
+| Orquesta `UseCase`: coordina entidades, repos, servicios | Invariantes de entidad → `Domain` |
+| Define DTOs Request/Response | Dapper, SQL, HttpClient concreto → `Infrastructure` |
+| Valida forma (`FluentValidation`: requeridos, formatos, rangos) | `HttpContext`, `IActionResult` → `Api` |
+| Define interfaces de orquestación (Infrastructure implementa) | Define `IRepository` → `Domain` |
+| Mapea DTO ↔ Entidad | Decide si cambio de estado es válido → entidad decide |
+| Consume `IRepository` (solo interfaz) | Código HTTP, formato de respuesta |
 
-**Señal de alarma:** si un `UseCase` necesita un `using` hacia `Precotex.Proyecto.Infraestructure`, algo se rompió: solo debe conocer interfaces, nunca implementaciones concretas.
+**Alarma:** `UseCase` con `using Infraestructure`. Rompe regla, solo conoce interfaces.

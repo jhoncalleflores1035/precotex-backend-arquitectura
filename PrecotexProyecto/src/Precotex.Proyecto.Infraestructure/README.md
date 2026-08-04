@@ -53,15 +53,15 @@ flowchart LR
 
 ## Alcance
 
-| Corresponde a esta capa | No corresponde (¿dónde va?) |
+| ✅ Sí | 🚫 No → capa |
 |---|---|
-| Implementación concreta de `IRepository` (Dapper) | Reglas de negocio / invariantes → `Domain` |
-| Conexión y contexto de acceso a datos (`DapperContext`) | Validación de entrada → `Application` |
-| Integraciones con servicios externos (correo, storage, pasarelas de pago) | Definir contratos (`IRepository`, interfaces de orquestación) — aquí solo se implementan, los define `Domain`/`Application` |
-| Mapeo de filas de BD a Entidades de `Domain` | Exponer tipos propios de Dapper (`IDbConnection`, `DynamicParameters`) fuera de esta capa |
-| Implementación de interfaces de orquestación definidas en `Application` | Tipos de ASP.NET Core (`HttpContext`, `IActionResult`) → `Api` |
-| — | Recibir o devolver DTOs de `Application` (siempre entra/sale con Entidades de `Domain`) |
+| Implementa `IRepository` (Dapper) | Reglas de negocio → `Domain` |
+| `DapperContext`, conexión a BD | Valida entrada → `Application` |
+| Integra servicios externos (correo, storage, pagos) | Define contratos — aquí solo se implementan |
+| Mapea filas de BD a Entidad de `Domain` | Expone `IDbConnection`, `DynamicParameters` fuera de la capa |
+| Implementa interfaces de orquestación de `Application` | `HttpContext`, `IActionResult` → `Api` |
+| — | Recibe/devuelve DTO de `Application` (siempre Entidad) |
 
-**Señal de alarma:** si un método público de un repositorio devuelve o recibe un tipo propio de Dapper en vez de una Entidad de `Domain`, esa fuga de abstracción rompe el contrato.
+**Alarma:** repositorio devuelve/recibe tipo propio de Dapper en vez de Entidad. Fuga de abstracción.
 
 Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).

@@ -91,17 +91,17 @@ app.MapControllers();
 
 ## Alcance
 
-| Corresponde a esta capa | No corresponde (¿dónde va?) |
+| ✅ Sí | 🚫 No → capa |
 |---|---|
-| Recibir el request HTTP y mapearlo a un Request DTO | Reglas de negocio / invariantes → `Domain` (Entidades) |
-| Delegar en el `UseCase` de `Application` correspondiente | Orquestar varios repositorios o servicios en un mismo flujo → `Application` (UseCase) |
-| Traducir el Response DTO a `IActionResult` / código HTTP | Acceso a datos (SQL, Dapper, conexión a BD) → `Infrastructure` |
-| Validación de forma del request (`ValidationFilter` + `FluentValidation` de `Application`) | Validación de reglas de negocio (invariantes) → `Domain` |
-| Autenticación/autorización de transporte (JWT, `[Authorize]`, políticas) | Definir contratos de persistencia (`IRepository`) → `Domain` |
-| Manejo centralizado de excepciones (`ExceptionHandlingMiddleware`) | Mapear una entidad de dominio directamente en la respuesta HTTP (siempre vía DTO) |
-| Composición de dependencias (`Program.cs`, `ServiceExtensions`) | Lógica condicional de negocio dentro de un Controller o Middleware |
-| Documentación de la API (Swagger/OpenAPI) | Detalles de implementación de infraestructura (queries, nombres de tabla) |
+| Mapea HTTP a Request DTO | Reglas de negocio → `Domain` |
+| Delega en `UseCase` | Orquesta varios repos/servicios → `Application` |
+| Traduce Response DTO a `IActionResult` | Acceso a datos (SQL, Dapper) → `Infrastructure` |
+| Valida forma del request (`ValidationFilter`) | Valida invariantes de negocio → `Domain` |
+| Auth JWT, `[Authorize]`, políticas | Define `IRepository` → `Domain` |
+| Maneja excepciones (`ExceptionHandlingMiddleware`) | Mapea entidad directo en la respuesta |
+| Compone DI (`Program.cs`, `ServiceExtensions`) | `if` de negocio en Controller/Middleware |
+| Documenta con Swagger | Detalle de queries, nombres de tabla |
 
-**Señal de alarma:** si un Controller o Middleware tiene un `if` que decide algo distinto de "qué código HTTP devolver", esa lógica se escapó de `Application`/`Domain` y debería moverse.
+**Alarma:** Controller con `if` que decide negocio, no código HTTP. Lógica fugó, mover.
 
 Ver arquitectura general en [docs/arquitectura.md](../../docs/arquitectura.md).

@@ -1,5 +1,8 @@
 # Precotex Proyecto
 
+Este repositorio es la plantilla oficial para los proyectos Backend de Precotex.
+Todo nuevo proyecto debe partir desde esta estructura.
+
 ## Objetivo
 
 El objetivo principal de este proyecto es el desarrollo de una solución de software robusta, mantenible y escalable, construida bajo los principios de **Clean Architecture**. Precotex nace como una base técnica sólida que separa claramente las responsabilidades entre capas (Domain, Application, Infrastructure y API), facilitando la evolución del sistema, la incorporación de nuevos módulos de negocio y la aplicación de buenas prácticas de desarrollo como la inversión de dependencias, la validación centralizada y el acceso a datos desacoplado mediante Dapper.

@@ -76,15 +76,15 @@ Por ahora **no** se usan Value Objects, Agregados, Excepciones de dominio ni Dom
 
 ## Alcance
 
-| Corresponde a esta capa | No corresponde (¿dónde va?) |
+| ✅ Sí | 🚫 No → capa |
 |---|---|
-| Entidades con identidad y las reglas de negocio que protegen su propio estado | DTOs de entrada/salida → `Application` |
-| Enums / catálogos cerrados del negocio | Orquestar varias entidades o repositorios en un mismo flujo → `Application` (UseCase) |
-| Interfaces de reglas de negocio puras (`IReglaDescuento`, `IValidable`) | Validación de formato de entrada (requeridos, tipos) → `Application` (Validators) |
-| Contratos de persistencia (`IRepository`), porque describen operaciones sobre sus propias entidades | Implementación de acceso a datos (Dapper, SQL) → `Infrastructure` |
-| Cuando se necesiten: Value Objects, Domain Events, excepciones de dominio | Cualquier `using` hacia `Application`, `Infrastructure` o `Api` |
-| — | Dependencias a librerías externas (Dapper, EF, FluentValidation, ASP.NET Core) |
+| Entidades con reglas propias, protegen su estado | DTOs de entrada/salida → `Application` |
+| Enums / catálogos cerrados | Orquesta varias entidades/repos → `Application` |
+| Interfaces de reglas puras (`IReglaDescuento`, `IValidable`) | Valida formato de entrada → `Application` |
+| Contratos `IRepository` (dueño de sus propias entidades) | Implementa acceso a datos → `Infrastructure` |
+| Futuro: Value Objects, Domain Events, excepciones de dominio | `using` hacia Application, Infrastructure o Api |
+| — | Dapper, EF, FluentValidation, ASP.NET Core |
 
-**Señal de alarma:** si una clase necesita un `using` hacia Application, Infrastructure o un paquete de acceso a datos, no pertenece a Domain (ver regla al inicio de este documento).
+**Alarma:** clase con `using` externo a Domain. No pertenece aquí (ver regla al inicio).
 
 Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).
