@@ -12,14 +12,39 @@ Ver detalle completo en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Tecnologías utilizadas
 
-| Tecnología | Uso |
-|---|---|
-| .NET / C# | Lenguaje y framework principal |
-| ASP.NET Core Web API | Capa de presentación / API REST |
-| Dapper | Micro ORM para acceso a datos en la capa de Infrastructure |
-| SQL Server | Motor de base de datos |
-| xUnit / Moq (o equivalente) | Pruebas unitarias |
-| Git / GitHub | Control de versiones |
+El stack se organiza según el momento del ciclo de trabajo en el que interviene: desarrollo del código, testing, build/ejecución y entrega de versiones.
+
+```mermaid
+flowchart LR
+    DEV["💻 Desarrollo\n.NET · ASP.NET Core\nDapper · SQL Server\nFluentValidation · Swagger · JWT"]
+    TEST["🧪 Testing\nxUnit · Moq"]
+    BUILD["⚙️ Build y ejecución\ndotnet CLI"]
+    DEL["🚀 Entrega\nGit · GitHub"]
+
+    DEV --> TEST --> BUILD --> DEL
+
+    style DEV fill:#1b4332,stroke:#1b4332,color:#fff
+    style TEST fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style BUILD fill:#40916c,stroke:#1b4332,color:#fff
+    style DEL fill:#74c69d,stroke:#1b4332,color:#000
+```
+
+| Tecnología | Etapa | Uso en el proyecto |
+|---|---|---|
+| .NET / C# | Desarrollo | Lenguaje y runtime base de las cuatro capas |
+| ASP.NET Core Web API | Desarrollo | Capa de presentación (`Precotex.Proyecto.Api`): controllers, middlewares, filters |
+| Dapper | Desarrollo | Acceso a datos en `Infrastructure` (`DapperContext`, repositorios); nunca expone sus tipos fuera de esa capa |
+| SQL Server | Desarrollo | Motor de base de datos consumido a través de `Infrastructure` |
+| FluentValidation | Desarrollo | Reglas de validación de entrada en `Application/Validators` |
+| Swagger / Swashbuckle | Desarrollo | Documentación interactiva de la API (`SwaggerOptions.cs`, `AddSwaggerConfig()`) |
+| JWT | Desarrollo | Autenticación de la API (`JwtOptions.cs`, `AddAuthConfig()`) |
+| xUnit / Moq | Testing | Pruebas unitarias por capa y dobles de prueba para dependencias externas |
+| dotnet CLI | Build y ejecución | `restore`, `build` y `run` del proyecto (ver [Cómo ejecutar el proyecto](#cómo-ejecutar-el-proyecto)) |
+| Git / GitHub | Entrega | Ramas `feature`/`fix`/`hotfix`, Pull Requests a `dev` y tags de versión en `main` |
+
+> La solución todavía no incluye un proyecto de pruebas (`.csproj`) creado: xUnit y Moq quedan fijados aquí como el estándar del proyecto y se incorporarán al crear dicho proyecto.
+
+Ver detalle completo del flujo de entrega en [docs/flujo-git.md](docs/flujo-git.md).
 
 ## Flujo de trabajo con Git
 
