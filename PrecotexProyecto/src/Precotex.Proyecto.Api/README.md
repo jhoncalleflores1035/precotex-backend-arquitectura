@@ -1,5 +1,7 @@
 # Precotex Proyecto Api
 
+## Descripción
+
 Punto de entrada de la aplicación.
 Su responsabilidad es recibir las solicitudes, validar la información de entrada, delegar los casos de uso y devolver la respuesta al cliente.
 No contiene lógica de negocio.
@@ -39,33 +41,9 @@ flowchart TD
     style PRG fill:#9d0208,stroke:#1b4332,color:#fff
 ```
 
-## Flujo: ejecución de un caso de uso
+---
 
-El request atraviesa la pipeline en orden: entra por los middlewares, pasa los filters, llega al controller y de ahí baja capa por capa hasta infraestructura.
-
-El controller nunca contiene lógica de negocio ni conoce detalles de infraestructura.
-
-```mermaid
-flowchart TD
-    A["🌐 Request"] --> B["🛡️ Middleware"]
-    B --> C["✅ Filters"]
-    C --> D["🎮 Controller"]
-    D --> E["⚙️ Application"]
-    E --> F["🟩 Domain"]
-    F --> G["📐 Repository (Interface)"]
-    G --> H["🏗️ Infrastructure"]
-
-    style A fill:#74c69d,stroke:#1b4332,color:#000
-    style B fill:#ffd166,stroke:#1b4332,color:#000
-    style C fill:#8ecae6,stroke:#1b4332,color:#000
-    style D fill:#2d6a4f,stroke:#1b4332,color:#fff
-    style E fill:#40916c,stroke:#1b4332,color:#fff
-    style F fill:#1b4332,stroke:#1b4332,color:#fff
-    style G fill:#f4a261,stroke:#1b4332,color:#000
-    style H fill:#e76f51,stroke:#1b4332,color:#fff
-```
-
-## Responsabilidades de la capa
+## Responsabilidades
 
 | Carpeta | Contiene | SOLID |
 |---|---|---|
@@ -76,6 +54,7 @@ flowchart TD
 | `Configuration/` | POCOs para `IOptions<T>` | SRP |
 | `Program.cs` | Composition root | — |
 
+---
 
 ## Composition Root
 
@@ -94,6 +73,56 @@ app.MapControllers();
 
 ---
 
+## Flujo
+
+El request recorre la pipeline de este proyecto y cruza hacia el resto de capas mediante un DTO.
+
+Dentro de `Api` no hay lógica de negocio: solo enruta, valida forma y traduce.
+
+```mermaid
+flowchart LR
+    subgraph API[" 📦 Precotex.Proyecto.Api "]
+        direction TB
+        A["🌐 Request"] --> B["🛡️ Middleware"]
+        B --> C["✅ Filters"]
+        C --> D["🎮 Controller"]
+    end
+
+    subgraph OTRAS[" 🌍 Otras capas "]
+        direction TB
+        E["⚙️ Application"] --> F["🟩 Domain"]
+        F --> G["📐 Repository (Interface)"]
+        G --> H["🏗️ Infrastructure"]
+    end
+
+    D -->|"Request DTO"| E
+
+    style API fill:#d8f3dc,stroke:#1b4332,color:#1b4332
+    style OTRAS fill:#e9ecef,stroke:#6c757d,color:#495057
+
+    style A fill:#74c69d,stroke:#1b4332,color:#000
+    style B fill:#ffd166,stroke:#1b4332,color:#000
+    style C fill:#8ecae6,stroke:#1b4332,color:#000
+    style D fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style E fill:#40916c,stroke:#1b4332,color:#fff
+    style F fill:#1b4332,stroke:#1b4332,color:#fff
+    style G fill:#f4a261,stroke:#1b4332,color:#000
+    style H fill:#e76f51,stroke:#1b4332,color:#fff
+```
+
+---
+
+## Dependencias
+
+La capa API puede depender de:
+
+- Application
+- Domain (opcional para contratos compartidos)
+
+No debe depender de implementaciones de Infrastructure.
+
+---
+
 ## Qué NO pertenece aquí
 
 | No colocar | Corresponde a |
@@ -107,16 +136,6 @@ app.MapControllers();
 
 ---
 
-
-## Dependencias
-
-La capa API puede depender de:
-
-- Application
-- Domain (opcional para contratos compartidos)
-
-No debe depender de implementaciones de Infrastructure.
-
----
+## Referencias
 
 Ver arquitectura general en [docs/arquitectura.md](../../docs/arquitectura.md).
