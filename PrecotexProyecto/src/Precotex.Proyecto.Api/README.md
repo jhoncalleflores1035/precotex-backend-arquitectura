@@ -1,6 +1,10 @@
 # Precotex Proyecto Api
 
-Punto de entrada de la solución. Depende de `Precotex.Proyecto.Application` → `Precotex.Proyecto.Domain`. Sin lógica de negocio: solo expone, valida y traduce.
+Punto de entrada de la aplicación.
+
+Su responsabilidad es recibir las solicitudes, validar la información de entrada, delegar los casos de uso y devolver la respuesta al cliente.
+
+No contiene lógica de negocio.
 
 ## Estructura
 
@@ -89,19 +93,29 @@ app.UseExceptionHandlingMiddleware();
 app.MapControllers();
 ```
 
-## Alcance
+## Qué pertenece aquí
 
-| ✅ Sí | 🚫 No → capa |
-|---|---|
-| Mapea HTTP a Request DTO | Reglas de negocio → `Domain` |
-| Delega en `UseCase` | Orquesta varios repos/servicios → `Application` |
-| Traduce Response DTO a `IActionResult` | Acceso a datos (SQL, Dapper) → `Infrastructure` |
-| Valida forma del request (`ValidationFilter`) | Valida invariantes de negocio → `Domain` |
-| Auth JWT, `[Authorize]`, políticas | Define `IRepository` → `Domain` |
-| Maneja excepciones (`ExceptionHandlingMiddleware`) | Mapea entidad directo en la respuesta |
-| Compone DI (`Program.cs`, `ServiceExtensions`) | `if` de negocio en Controller/Middleware |
-| Documenta con Swagger | Detalle de queries, nombres de tabla |
+- Mapea HTTP a Request DTO
+- Delega en `UseCase`
+- Traduce Response DTO a `IActionResult`
+- Valida forma del request (`ValidationFilter`)
+- Maneja excepciones (`ExceptionHandlingMiddleware`)
+- Compone DI (`Program.cs`, `ServiceExtensions`)
+- Documenta con Swagger
 
-**Alarma:** Controller con `if` que decide negocio, no código HTTP. Lógica fugó, mover.
+---
+
+## Qué NO pertenece aquí
+
+- Reglas de negocio → `Domain`
+- Orquesta varios repos/servicios → `Application`
+- Acceso a datos (SQL, Dapper) → `Infrastructure`
+- Valida invariantes de negocio → `Domain`
+- Define `IRepository` → `Domain`
+- Mapea entidad directo en la respuesta
+- `if` de negocio en Controller/Middleware
+- Detalle de queries, nombres de tabla
+
+---
 
 Ver arquitectura general en [docs/arquitectura.md](../../docs/arquitectura.md).
