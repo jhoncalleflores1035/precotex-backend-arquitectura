@@ -2,7 +2,9 @@
 
 ## Descripción
 
-Depende de `Precotex.Proyecto.Domain` (implementa sus contratos de persistencia, `IRepository`) y de `Precotex.Proyecto.Application` (implementa sus contratos de orquestación). Implementa lo que Domain y Application definen como interfaz: **cómo** se resuelve el acceso a datos y los servicios externos, nunca **qué** se necesita.
+Capa encargada de implementar los detalles técnicos externos de la aplicación.
+Depende de `Precotex.Proyecto.Domain` para implementar contratos de persistencia (`IRepository`) y encapsular el acceso a datos mediante Dapper.
+Contiene implementaciones concretas de infraestructura, sin incluir reglas de negocio.
 
 ## Estructura
 
@@ -31,24 +33,26 @@ flowchart TD
 
 ## Responsabilidades
 
-| Carpeta | Contiene | SOLID |
-|---|---|---|
-| `Repositories/{Modulo}/` | Implementación concreta (Dapper) de las interfaces definidas en Domain, organizadas por módulo de negocio | DIP / LSP |
-| `Persistence/` | Conexión y contexto de acceso a datos (`DapperContext`) | SRP |
-| `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) | SRP / ISP |
+| Carpeta | Responsabilidad |
+|---|---|
+| `Repositories/{Modulo}/` | Implementación concreta de contratos de persistencia definidos en Domain |
+| `Persistence/` | Configuración de acceso a datos (`DapperContext`) |
+| `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) |
 
 ---
 
 ## Flujo
 
-`DapperRepository` implementa el `IRepository` definido en `Domain`, usa `DapperContext` para acceder a la base de datos y mapea las filas obtenidas a la Entidad de `Domain`. Nunca expone tipos propios de Dapper (`IDbConnection`, `DynamicParameters`, etc.) fuera de esta capa.
+`Infrastructure Repository` implementa los contratos `IRepository` definidos por `Domain`.
+Utiliza Dapper y los componentes de persistencia para acceder a datos, transformando los resultados obtenidos en entidades del dominio.
+Los detalles técnicos de acceso a datos permanecen encapsulados dentro de esta capa.
 
 ```mermaid
 flowchart LR
-    A["🔌 IRepository (Domain)"] --> B["🏗️ DapperRepository"]
+    A["🔌 IRepository (Domain)"] -. implementado por .- B["🏗️ Repository"]
     B --> C["🔌 DapperContext"]
     C --> D[("🛢️ Base de datos")]
-    B --> E["🟩 Entidad (Domain)"]
+    B --> E["🟩 Domain Entity"]
 
     style A fill:#e76f51,stroke:#1b4332,color:#fff
     style B fill:#2d6a4f,stroke:#1b4332,color:#fff
@@ -61,14 +65,13 @@ flowchart LR
 
 ## Dependencias
 
-La capa Infraestructure puede depender de:
+Infrastructure depende de:
 
 - Domain
-- Application
 
-No debe ser referenciada por ninguna otra capa: Domain, Application y Api no conocen sus implementaciones concretas, solo las interfaces que Infraestructure implementa.
+Implementa contratos de persistencia definidos por Domain.
 
-**Alarma:** repositorio devuelve/recibe tipo propio de Dapper en vez de Entidad. Fuga de abstracción.
+No es referenciada directamente por API ni Application; sus implementaciones son registradas mediante inyección de dependencias.
 
 ---
 
@@ -76,11 +79,10 @@ No debe ser referenciada por ninguna otra capa: Domain, Application y Api no con
 
 | No colocar | Corresponde a |
 |---|---|
+| DTOs de API | `Application` |
+| Contratos de negocio (IService) | `Application` |
 | Reglas de negocio | `Domain` |
-| Validación de entrada | `Application` |
-| Definición de contratos (`IRepository`, interfaces de orquestación) | `Domain` / `Application` |
-| `HttpContext`, `IActionResult` | `Api` |
-| DTO de entrada/salida (siempre debe recibir/devolver Entidad) | `Application` |
+| Contratos de persistencia (IRepository) | `Domain` |
 
 ---
 
