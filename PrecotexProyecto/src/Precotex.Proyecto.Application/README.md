@@ -1,8 +1,10 @@
 # Precotex Proyecto Application
 
-Depende de `Precotex.Proyecto.Domain`. No conoce a `Precotex.Proyecto.Api` ni a `Precotex.Proyecto.Infrastructure`: define **qué** se necesita para orquestar casos de uso (interfaces de servicios), nunca **cómo** se resuelve. Los contratos de persistencia (`IRepository`) no viven aquí: los define `Domain`, porque describen operaciones sobre sus propias entidades.
+## Descripción
 
-Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).
+Capa encargada de orquestar los casos de uso del sistema.
+Define contratos de servicios consumidos por la API, gestiona DTOs de entrada/salida y coordina operaciones con Domain mediante sus contratos.
+No contiene lógica de infraestructura ni reglas propias del dominio.
 
 ## Estructura
 
@@ -29,49 +31,80 @@ flowchart TD
     style VALF fill:#ffd166,stroke:#1b4332,color:#000
 ```
 
-## Flujo: ejecución de un caso de uso
+---
 
-El caso de uso es el único punto de entrada a la lógica de negocio para el mundo exterior. Nunca conoce Dapper, EF ni ningún detalle de infraestructura: solo conoce **interfaces**, que `Infrastructure` implementa por inyección de dependencias.
+## Responsabilidades
+
+| Carpeta | Responsabilidad |
+|---|---|
+| `Interfaces/{Modulo}/` | Contratos de servicios de aplicación que exponen los casos de uso consumidos por la API. |
+| `DTOs/` | Modelos de entrada y salida entre API y Application. |
+| `Validators/` | Validación de datos de entrada mediante FluentValidation. |
+
+---
+
+## Flujo
+
+La API invoca al `Application Service` (el `UseCase`). Este valida el request con el `Validator`, coordina operaciones con `Domain` y utiliza contratos definidos por este, cuya implementación corresponde a `Infrastructure`. y arma el `Response DTO` que retorna a la API.
 
 ```mermaid
 flowchart LR
-    A["🌐 API Controller"] -->|"Request DTO"| B["⚙️ UseCase"]
-    B --> C{"✅ Validator"}
-    C -->|inválido| X["⚠️ Exception"]
-    C -->|válido| D["🔌 IRepository (Domain)"]
-    D -.implementado por.-> E["🏗️ Infrastructure"]
-    E -->|"Entidad"| F["🟩 Domain (Entidad)"]
-    F --> B
-    B -->|"Response DTO"| A
+    A["🌐 API"] --> B["⚙️ Application Service"]
+    B --> V["✅ Validator"]
+    B --> D["🟩 Domain"]
+    D --> I["🏗️ Infrastructure"]
+    B --> R["📦 Response DTO"]
+    R --> A
 
     style A fill:#74c69d,stroke:#1b4332,color:#000
     style B fill:#2d6a4f,stroke:#1b4332,color:#fff
-    style C fill:#ffb703,stroke:#1b4332,color:#000
-    style X fill:#9d0208,stroke:#1b4332,color:#fff
-    style D fill:#e76f51,stroke:#1b4332,color:#fff
-    style E fill:#f4a261,stroke:#1b4332,color:#000
-    style F fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style V fill:#ffb703,stroke:#1b4332,color:#000
+    style D fill:#1b4332,stroke:#1b4332,color:#fff
+    style I fill:#e76f51,stroke:#1b4332,color:#fff
+    style R fill:#8ecae6,stroke:#1b4332,color:#000
 ```
 
-`Domain` **define** `IRepository`; `Infrastructure` lo **implementa**; `Application` (el `UseCase`) solo lo **consume** por inyección de dependencias, sin conocer la implementación concreta. Si el caso de uso necesitara conocer la clase concreta (`DapperPedidoRepository`), la dependencia estaría invertida y rompería la regla de la arquitectura.
+---
 
-## Carpeta → contenido → SOLID
+## Casos de Uso
 
-| Carpeta | Contiene | SOLID |
-|---|---|---|
-| `Interfaces/{Modulo}/` | Contratos propios de orquestación (servicios externos, notificaciones) que implementa Infrastructure, organizados por módulo de negocio — los repositorios (`IRepository`) viven en `Domain` | DIP / ISP |
-| `DTOs/` | Objetos planos de entrada/salida, sin lógica | SRP |
-| `Validators/` | Reglas de validación de entrada | SRP |
+Los servicios de Application representan las acciones disponibles para la API.
 
-## Alcance
+Cada servicio:
+- recibe información mediante DTOs
+- valida la entrada
+- coordina operaciones con Domain
+- devuelve resultados al consumidor
 
-| ✅ Sí | 🚫 No → capa |
+---
+
+## Dependencias
+
+La capa Application puede depender de:
+
+- Domain
+
+No conoce:
+
+- API
+- Infrastructure
+- Persistencia
+- Detalles externos
+
+---
+
+## Qué NO pertenece aquí
+
+| No colocar | Corresponde a |
 |---|---|
-| Orquesta `UseCase`: coordina entidades, repos, servicios | Invariantes de entidad → `Domain` |
-| Define DTOs Request/Response | Dapper, SQL, HttpClient concreto → `Infrastructure` |
-| Valida forma (`FluentValidation`: requeridos, formatos, rangos) | `HttpContext`, `IActionResult` → `Api` |
-| Define interfaces de orquestación (Infrastructure implementa) | Define `IRepository` → `Domain` |
-| Mapea DTO ↔ Entidad | Decide si cambio de estado es válido → entidad decide |
-| Consume `IRepository` (solo interfaz) | Código HTTP, formato de respuesta |
+| Reglas e invariantes de negocio | `Domain` |
+| Dapper, SQL, `HttpClient` concreto | `Infrastructure` |
+| `HttpContext`, `IActionResult` | `Api` |
+| Definición de `IRepository` | `Domain` |
+| Código HTTP, formato de respuesta | `Api` |
 
-**Alarma:** `UseCase` con `using Infraestructure`. Rompe regla, solo conoce interfaces.
+---
+
+## Referencias
+
+Ver arquitectura general en [docs/arquitectura.md](../../docs/arquitectura.md).

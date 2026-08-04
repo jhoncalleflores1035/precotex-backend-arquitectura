@@ -1,5 +1,7 @@
 # Precotex Proyecto Infraestructure
 
+## Descripción
+
 Depende de `Precotex.Proyecto.Domain` (implementa sus contratos de persistencia, `IRepository`) y de `Precotex.Proyecto.Application` (implementa sus contratos de orquestación). Implementa lo que Domain y Application definen como interfaz: **cómo** se resuelve el acceso a datos y los servicios externos, nunca **qué** se necesita.
 
 ## Estructura
@@ -25,14 +27,28 @@ flowchart TD
     style EXTF fill:#8ecae6,stroke:#1b4332,color:#000
 ```
 
-## Flujo: implementación de un repositorio con Dapper
+---
+
+## Responsabilidades
+
+| Carpeta | Contiene | SOLID |
+|---|---|---|
+| `Repositories/{Modulo}/` | Implementación concreta (Dapper) de las interfaces definidas en Domain, organizadas por módulo de negocio | DIP / LSP |
+| `Persistence/` | Conexión y contexto de acceso a datos (`DapperContext`) | SRP |
+| `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) | SRP / ISP |
+
+---
+
+## Flujo
+
+`DapperRepository` implementa el `IRepository` definido en `Domain`, usa `DapperContext` para acceder a la base de datos y mapea las filas obtenidas a la Entidad de `Domain`. Nunca expone tipos propios de Dapper (`IDbConnection`, `DynamicParameters`, etc.) fuera de esta capa.
 
 ```mermaid
 flowchart LR
-    A["🔌 IRepository (Domain)"] -.implementa.-> B["🏗️ DapperRepository"]
+    A["🔌 IRepository (Domain)"] --> B["🏗️ DapperRepository"]
     B --> C["🔌 DapperContext"]
     C --> D[("🛢️ Base de datos")]
-    B -->|"mapea filas a"| E["🟩 Entidad (Domain)"]
+    B --> E["🟩 Entidad (Domain)"]
 
     style A fill:#e76f51,stroke:#1b4332,color:#fff
     style B fill:#2d6a4f,stroke:#1b4332,color:#fff
@@ -41,27 +57,33 @@ flowchart LR
     style E fill:#2d6a4f,stroke:#1b4332,color:#fff
 ```
 
-`DapperRepository` solo conoce el `IRepository` que implementa y la entidad de `Domain` que devuelve. Nunca expone tipos propios de Dapper (`IDbConnection`, `DynamicParameters`, etc.) fuera de esta capa.
+---
 
-## Carpeta → contenido → SOLID
+## Dependencias
 
-| Carpeta | Contiene | SOLID |
-|---|---|---|
-| `Repositories/{Modulo}/` | Implementación concreta (Dapper) de las interfaces definidas en Domain, organizadas por módulo de negocio | DIP / LSP |
-| `Persistence/` | Conexión y contexto de acceso a datos (`DapperContext`) | SRP |
-| `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) | SRP / ISP |
+La capa Infraestructure puede depender de:
 
-## Alcance
+- Domain
+- Application
 
-| ✅ Sí | 🚫 No → capa |
-|---|---|
-| Implementa `IRepository` (Dapper) | Reglas de negocio → `Domain` |
-| `DapperContext`, conexión a BD | Valida entrada → `Application` |
-| Integra servicios externos (correo, storage, pagos) | Define contratos — aquí solo se implementan |
-| Mapea filas de BD a Entidad de `Domain` | Expone `IDbConnection`, `DynamicParameters` fuera de la capa |
-| Implementa interfaces de orquestación de `Application` | `HttpContext`, `IActionResult` → `Api` |
-| — | Recibe/devuelve DTO de `Application` (siempre Entidad) |
+No debe ser referenciada por ninguna otra capa: Domain, Application y Api no conocen sus implementaciones concretas, solo las interfaces que Infraestructure implementa.
 
 **Alarma:** repositorio devuelve/recibe tipo propio de Dapper en vez de Entidad. Fuga de abstracción.
 
-Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).
+---
+
+## Qué NO pertenece aquí
+
+| No colocar | Corresponde a |
+|---|---|
+| Reglas de negocio | `Domain` |
+| Validación de entrada | `Application` |
+| Definición de contratos (`IRepository`, interfaces de orquestación) | `Domain` / `Application` |
+| `HttpContext`, `IActionResult` | `Api` |
+| DTO de entrada/salida (siempre debe recibir/devolver Entidad) | `Application` |
+
+---
+
+## Referencias
+
+Ver arquitectura general en [docs/arquitectura.md](../../docs/arquitectura.md).
