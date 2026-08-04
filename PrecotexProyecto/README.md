@@ -15,38 +15,41 @@ Ver detalle completo en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Tecnologías utilizadas
 
-El stack se organiza según el momento del ciclo de trabajo en el que interviene: desarrollo en .NET, base de datos, testing y entrega de versiones.
+El stack se organiza según la capa de Clean Architecture donde interviene cada tecnología, siguiendo el mismo flujo de dependencias del proyecto: la API recibe la solicitud, Application la orquesta, Domain aplica las reglas e Infrastructure persiste contra SQL Server. Testing y entrega son transversales a las cuatro capas.
 
 ```mermaid
 flowchart LR
-    DEV["💻 .NET\nC# · ASP.NET Core\nDapper · FluentValidation\nSwagger · JWT"]
-    DB["🗄️ Base de datos\nSQL Server"]
-    TEST["🧪 Testing\nxUnit · Moq"]
-    DEL["🚀 Entrega\nGit · GitHub"]
+    API["🌐 Api\nASP.NET Core · Swagger"] --> APPL["⚙️ Application\nFluentValidation"]
+    APPL --> DOM["🟩 Domain\nC# / .NET"]
+    INFRA["🏗️ Infrastructure\nDapper"] --> DOM
+    INFRA --> DB[("🛢️ SQL Server")]
 
-    DEV --> DB --> TEST --> DEL
+    API -.-> TEST["🧪 xUnit · Moq"]
+    APPL -.-> TEST
+    DOM -.-> TEST
+    INFRA -.-> TEST
+    TEST --> DEL["🚀 Git · GitHub"]
 
-    style DEV fill:#1b4332,stroke:#1b4332,color:#fff
-    style DB fill:#2d6a4f,stroke:#1b4332,color:#fff
-    style TEST fill:#40916c,stroke:#1b4332,color:#fff
-    style DEL fill:#74c69d,stroke:#1b4332,color:#000
+    style API fill:#74c69d,stroke:#1b4332,color:#000
+    style APPL fill:#40916c,stroke:#1b4332,color:#fff
+    style DOM fill:#1b4332,stroke:#1b4332,color:#fff
+    style INFRA fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style DB fill:#219ebc,stroke:#1b4332,color:#fff
+    style TEST fill:#ffb703,stroke:#1b4332,color:#000
+    style DEL fill:#9d0208,stroke:#1b4332,color:#fff
 ```
 
-| Tecnología | Etapa | Uso en el proyecto |
+| Tecnología | Capa / Etapa | Uso en el proyecto |
 |---|---|---|
-| .NET / C# | .NET | Lenguaje y runtime base de las cuatro capas |
-| ASP.NET Core Web API | .NET | Capa de presentación (`Precotex.Proyecto.Api`): controllers, middlewares, filters |
-| Dapper | .NET | Acceso a datos en `Infrastructure` (`DapperContext`, repositorios); nunca expone sus tipos fuera de esa capa |
-| FluentValidation | .NET | Reglas de validación de entrada en `Application/Validators` |
-| Swagger / Swashbuckle | .NET | Documentación interactiva de la API (`SwaggerOptions.cs`, `AddSwaggerConfig()`) |
-| JWT | .NET | Autenticación de la API (`JwtOptions.cs`, `AddAuthConfig()`) |
+| C# / .NET | Domain | Lenguaje y runtime base de las cuatro capas |
+| ASP.NET Core Web API | Api | Controllers, middlewares, filters (`Precotex.Proyecto.Api`) |
+| Swagger / Swashbuckle | Api | Documentación interactiva de la API (`SwaggerOptions.cs`, `AddSwaggerConfig()`) |
+| FluentValidation | Application | Reglas de validación de entrada en `Application/Validators` |
+| Dapper | Infrastructure | Acceso a datos (`DapperContext`, repositorios); nunca expone sus tipos fuera de esa capa |
 | SQL Server | Base de datos | Motor de base de datos consumido a través de `Infrastructure` |
 | xUnit / Moq | Testing | Pruebas unitarias por capa y dobles de prueba para dependencias externas |
 | Git / GitHub | Entrega | Ramas `feature`/`fix`/`hotfix`, Pull Requests a `dev` y tags de versión en `main` |
 
-> La solución todavía no incluye los proyectos de pruebas (`.csproj`) creados: xUnit y Moq quedan fijados aquí como el estándar del proyecto. Ver la estructura planificada, la pirámide de pruebas y su relación con SOLID en [tests/README.md](tests/README.md).
-
-Ver detalle completo del flujo de entrega en [docs/flujo-git.md](docs/flujo-git.md).
 
 ## Flujo de trabajo con Git
 

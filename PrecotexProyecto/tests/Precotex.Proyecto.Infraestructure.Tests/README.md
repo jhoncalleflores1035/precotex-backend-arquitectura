@@ -1,20 +1,11 @@
 # Precotex Proyecto Infraestructure.Tests
 
-Prueba `Precotex.Proyecto.Infraestructure`. Son pruebas de integración: se ejecutan contra una base de datos real de test (LocalDB o contenedor), nunca contra mocks — mockear Dapper no probaría nada sobre el SQL real.
+## Descripción
 
-```mermaid
-flowchart LR
-    IT[Infraestructure.Tests] --> INFRA[Infraestructure]
-    INFRA --> DOM[Domain]
-    INFRA --> APP[Application]
-    IT -.contra.-> BD[("🛢️ Base de datos de test")]
-
-    style INFRA fill:#74c69d,stroke:#1b4332,color:#000
-    style DOM fill:#2d6a4f,stroke:#1b4332,color:#fff
-    style APP fill:#40916c,stroke:#1b4332,color:#fff
-    style IT fill:#95d5b2,stroke:#1b4332,color:#000
-    style BD fill:#219ebc,stroke:#1b4332,color:#fff
-```
+Contiene pruebas automatizadas de la capa `Precotex.Proyecto.Infrastructure`.
+Son pruebas de integración enfocadas en validar el acceso real a datos mediante Dapper.
+Se ejecutan contra una base de datos de prueba (LocalDB o contenedor), validando consultas SQL, mapeo de entidades y comportamiento de los repositorios.
+No utiliza mocks de persistencia, ya que el objetivo es verificar la integración real entre código, SQL y base de datos.
 
 ## Estructura
 
@@ -39,7 +30,21 @@ flowchart TD
     style FIXF fill:#8ecae6,stroke:#1b4332,color:#000
 ```
 
-## Flujo: prueba de un repositorio Dapper
+---
+
+## Responsabilidades
+
+| Carpeta | Responsabilidad | 
+|---|---|
+| `Repositories/{Modulo}/` | Tests de integración de repositorios contra BD real |
+| `Persistence/` | Tests de conexión y configuración de Dapper |
+| `TestHelpers/` | Fixtures, seed y limpieza de datos de prueba |
+
+---
+
+## Flujo
+
+Cada test siembra el estado necesario en la base de datos de test, ejecuta el método del repositorio y verifica que la entidad de `Domain` devuelta sea correcta. Al finalizar (o al iniciar) el test se revierte el cambio — por transacción con rollback o por reseteo del esquema — para que los tests no dependan del orden de ejecución ni entre sí.
 
 ```mermaid
 flowchart LR
@@ -55,16 +60,41 @@ flowchart LR
     style D fill:#74c69d,stroke:#1b4332,color:#000
 ```
 
-Cada test siembra el estado necesario en la base de datos de test, ejecuta el método del repositorio y verifica que la entidad de `Domain` devuelta sea correcta. Al finalizar (o al iniciar) el test se revierte el cambio — por transacción con rollback o por reseteo del esquema — para que los tests no dependan del orden de ejecución ni entre sí.
-
 Si dos implementaciones distintas de `IPedidoRepository` existieran (por ejemplo, Dapper y en memoria para tests rápidos), ambas deberían pasar exactamente el mismo conjunto de tests de contrato — es la prueba práctica de que son sustituibles entre sí.
 
-## Carpeta → contenido → SOLID
+---
 
-| Carpeta | Contiene | SOLID que valida |
-|---|---|---|
-| `Repositories/{Modulo}/` | Tests de integración por repositorio, contra base de datos real | LSP — cualquier implementación de la interfaz debe pasar el mismo contrato de test |
-| `Persistence/` | Tests de `DapperContext`: apertura/cierre de conexión, manejo de errores de conexión | SRP |
-| `TestHelpers/` | Fixture de conexión a la BD de test, scripts de seed y limpieza compartidos | SRP (de los propios tests) |
+## Dependencias
+
+`Infraestructure.Tests` referencia `Infraestructure` (y, transitivamente, `Domain`), y se ejecuta contra una base de datos de test real.
+
+```mermaid
+flowchart LR
+    IT[Infraestructure.Tests] --> INFRA[Infraestructure]
+    INFRA --> DOM[Domain]
+    IT -.contra.-> BD[("🛢️ Base de datos de test")]
+
+    style INFRA fill:#74c69d,stroke:#1b4332,color:#000
+    style DOM fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style IT fill:#95d5b2,stroke:#1b4332,color:#000
+    style BD fill:#219ebc,stroke:#1b4332,color:#fff
+```
+
+---
+
+## Qué NO pertenece aquí
+
+| No colocar | Corresponde a |
+|---|---|
+| Pruebas de reglas de negocio | `Domain.Tests` |
+| Pruebas de UseCases/Validators | `Application.Tests` |
+| Pruebas de Controllers, Middlewares, Filters | `Api.Tests` |
+| Mocks de Dapper o del acceso a datos | no aporta valor aquí — usar base de datos real de test |
+| Lógica condicional (`if`, loops) dentro de un test | usar `[Theory]`/`[InlineData]` |
+
+---
+
+## Referencias
 
 Ver la estrategia general de pruebas en [tests/README.md](../README.md).
+Ver la capa que prueba en [src/Precotex.Proyecto.Infraestructure/README.md](../../src/Precotex.Proyecto.Infraestructure/README.md).

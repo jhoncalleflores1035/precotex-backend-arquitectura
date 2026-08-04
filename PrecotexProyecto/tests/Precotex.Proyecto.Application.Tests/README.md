@@ -1,16 +1,10 @@
 # Precotex Proyecto Application.Tests
 
-Prueba `Precotex.Proyecto.Application`. Referencia `Application` (y transitivamente `Domain`). Usa Moq para los contratos que el UseCase consume por inyección: `IRepository` (definido en Domain) e interfaces de orquestación (definidas en Application).
+## Descripción
 
-```mermaid
-flowchart LR
-    AT[Application.Tests] --> APP[Application]
-    APP --> DOM[Domain]
-
-    style APP fill:#40916c,stroke:#1b4332,color:#fff
-    style DOM fill:#2d6a4f,stroke:#1b4332,color:#fff
-    style AT fill:#95d5b2,stroke:#1b4332,color:#000
-```
+Contiene pruebas automatizadas de la capa `Precotex.Proyecto.Application`.
+Valida el comportamiento de los casos de uso, servicios de aplicación y validadores, aislando sus dependencias mediante mocks.
+Referencia únicamente `Application` (y transitivamente `Domain`). Utiliza Moq para simular contratos consumidos por inyección de dependencias como repositorios e interfaces externas.
 
 ## Estructura
 
@@ -35,7 +29,21 @@ flowchart TD
     style THF fill:#8ecae6,stroke:#1b4332,color:#000
 ```
 
-## Flujo: prueba de un caso de uso
+---
+
+## Responsabilidades
+
+| Carpeta | Responsabilidad |
+|---|---|
+| `UseCases/{Modulo}/` | Tests unitarios de casos de uso con repositorios y servicios mockeados |
+| `Validators/` | Tests de validación de DTOs | 
+| `TestHelpers/` | Builders y configuraciones reutilizables para tests | 
+
+---
+
+## Flujo
+
+El test construye los mocks de las interfaces que el UseCase recibe por constructor (`Mock<IPedidoRepository>`, etc.), configura el comportamiento esperado (`Setup`), ejecuta el caso de uso con un Request DTO y verifica dos cosas: el Response DTO devuelto (`Assert`), y opcionalmente que el UseCase llamó a las dependencias correctas (`Verify`). Nunca instancia una clase concreta de Infraestructura — si tuviera que hacerlo, el UseCase estaría acoplado a una implementación concreta.
 
 ```mermaid
 flowchart LR
@@ -50,16 +58,38 @@ flowchart LR
     style D fill:#74c69d,stroke:#1b4332,color:#000
 ```
 
-El test construye los mocks de las interfaces que el UseCase recibe por constructor (`Mock<IPedidoRepository>`, etc.), configura el comportamiento esperado (`Setup`), ejecuta el caso de uso con un Request DTO y verifica dos cosas: el Response DTO devuelto (`Assert`), y opcionalmente que el UseCase llamó a las dependencias correctas (`Verify`). Nunca instancia una clase concreta de Infraestructure — si tuviera que hacerlo, el UseCase estaría acoplado a una implementación concreta.
-
 `Validators/` se prueba sin mocks: cada test alimenta el validator con un DTO válido/inválido y verifica el resultado (`IsValid`, lista de errores).
 
-## Carpeta → contenido → SOLID
+---
 
-| Carpeta | Contiene | SOLID que valida |
-|---|---|---|
-| `UseCases/{Modulo}/` | Un archivo de test por UseCase, con mocks de `IRepository` (Domain) e interfaces de orquestación (Application) | DIP — si un UseCase no se puede mockear sin referenciar Infraestructure, la dependencia está invertida |
-| `Validators/` | Un archivo de test por Validator, casos válidos e inválidos | SRP — cada Validator prueba un único DTO |
-| `TestHelpers/` | Builders de DTOs/entidades y helpers de configuración de mocks reutilizables entre UseCases | SRP (de los propios tests) |
+## Dependencias
+
+`Application.Tests` referencia únicamente `Application` (y, transitivamente, `Domain`). Nunca referencia `Api`, `Infraestructure` ni ningún otro proyecto de test.
+
+```mermaid
+flowchart LR
+    AT[Application.Tests] --> APP[Application]
+    APP --> DOM[Domain]
+
+    style APP fill:#40916c,stroke:#1b4332,color:#fff
+    style DOM fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style AT fill:#95d5b2,stroke:#1b4332,color:#000
+```
+
+---
+
+## Qué NO pertenece aquí
+
+| No colocar | Corresponde a |
+|---|---|
+| Pruebas de reglas de negocio de entidades | `Domain.Tests` |
+| Pruebas de Controllers, Middlewares, Filters | `Api.Tests` |
+| Pruebas contra base de datos real (sin mocks) | `Infraestructure.Tests` |
+| Instanciar una clase concreta de Infraestructure en el test | señal de que el UseCase rompe DIP |
+
+---
+
+## Referencias
 
 Ver la estrategia general de pruebas en [tests/README.md](../README.md).
+Ver la capa que prueba en [src/Precotex.Proyecto.Application/README.md](../../src/Precotex.Proyecto.Application/README.md).

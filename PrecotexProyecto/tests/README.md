@@ -77,4 +77,9 @@ Los tests no solo verifican comportamiento: son la prueba práctica de que cada 
 | `Infraestructure.Tests` | Cualquier implementación de `IRepository` se puede probar con el mismo contrato de test (mismos casos, misma aserción sobre el resultado) | Si una implementación concreta exige un test distinto para cumplir el mismo contrato, viola la sustitución | LSP |
 | `Api.Tests` | El Controller se prueba mockeando el UseCase, sin lógica de negocio propia que probar | Si el test de Controller necesita preparar datos de negocio complejos, el Controller está haciendo más de lo que le corresponde | SRP / DIP |
 
+---
+
+## Referencias
+
 Ver arquitectura general en [docs/arquitectura.md](../docs/arquitectura.md).
+Ver el detalle de cada capa en `src/{Proyecto}/README.md` y su contraparte de test en `tests/{Proyecto}.Tests/README.md`.
