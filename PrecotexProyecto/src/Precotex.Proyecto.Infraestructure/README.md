@@ -51,4 +51,17 @@ flowchart LR
 | `Persistence/` | Conexión y contexto de acceso a datos (`DapperContext`) | SRP |
 | `ExternalServices/` | Integraciones con servicios externos (correo, storage, etc.) | SRP / ISP |
 
+## Alcance
+
+| Corresponde a esta capa | No corresponde (¿dónde va?) |
+|---|---|
+| Implementación concreta de `IRepository` (Dapper) | Reglas de negocio / invariantes → `Domain` |
+| Conexión y contexto de acceso a datos (`DapperContext`) | Validación de entrada → `Application` |
+| Integraciones con servicios externos (correo, storage, pasarelas de pago) | Definir contratos (`IRepository`, interfaces de orquestación) — aquí solo se implementan, los define `Domain`/`Application` |
+| Mapeo de filas de BD a Entidades de `Domain` | Exponer tipos propios de Dapper (`IDbConnection`, `DynamicParameters`) fuera de esta capa |
+| Implementación de interfaces de orquestación definidas en `Application` | Tipos de ASP.NET Core (`HttpContext`, `IActionResult`) → `Api` |
+| — | Recibir o devolver DTOs de `Application` (siempre entra/sale con Entidades de `Domain`) |
+
+**Señal de alarma:** si un método público de un repositorio devuelve o recibe un tipo propio de Dapper en vez de una Entidad de `Domain`, esa fuga de abstracción rompe el contrato.
+
 Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).

@@ -74,4 +74,17 @@ El `UseCase` le entrega a la entidad los datos ya validados en forma primitiva; 
 
 Por ahora **no** se usan Value Objects, Agregados, Excepciones de dominio ni Domain Events en este proyecto. Si en el futuro se necesitan, se documentan aquí antes de introducirlos.
 
+## Alcance
+
+| Corresponde a esta capa | No corresponde (¿dónde va?) |
+|---|---|
+| Entidades con identidad y las reglas de negocio que protegen su propio estado | DTOs de entrada/salida → `Application` |
+| Enums / catálogos cerrados del negocio | Orquestar varias entidades o repositorios en un mismo flujo → `Application` (UseCase) |
+| Interfaces de reglas de negocio puras (`IReglaDescuento`, `IValidable`) | Validación de formato de entrada (requeridos, tipos) → `Application` (Validators) |
+| Contratos de persistencia (`IRepository`), porque describen operaciones sobre sus propias entidades | Implementación de acceso a datos (Dapper, SQL) → `Infrastructure` |
+| Cuando se necesiten: Value Objects, Domain Events, excepciones de dominio | Cualquier `using` hacia `Application`, `Infrastructure` o `Api` |
+| — | Dependencias a librerías externas (Dapper, EF, FluentValidation, ASP.NET Core) |
+
+**Señal de alarma:** si una clase necesita un `using` hacia Application, Infrastructure o un paquete de acceso a datos, no pertenece a Domain (ver regla al inicio de este documento).
+
 Ver detalle general de la arquitectura en [docs/arquitectura.md](../../docs/arquitectura.md).
